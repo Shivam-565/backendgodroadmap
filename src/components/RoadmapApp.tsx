@@ -2,8 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { roadmapData, Phase, Topic, Task } from '@/lib/roadmap-data';
 import { useChecklist } from '@/hooks/useChecklist';
 import LiveClock from '@/components/LiveClock';
@@ -12,10 +10,6 @@ import dynamic from 'next/dynamic';
 const SpaceBackground = dynamic(() => import('./SpaceBackground'), {
   ssr: false,
 });
-
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger);
-}
 
 export default function RoadmapApp() {
   const {
@@ -34,34 +28,7 @@ export default function RoadmapApp() {
   // Container refs for ScrollTrigger
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Initialize GSAP ScrollTrigger animation for Phase cards
-  useEffect(() => {
-    if (!isLoaded) return;
 
-    // Quick scroll reveal for phase cards
-    const cards = document.querySelectorAll('.phase-card');
-    cards.forEach((card) => {
-      gsap.fromTo(
-        card,
-        { opacity: 0, y: 40 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: card,
-            start: 'top 85%',
-            toggleActions: 'play none none none',
-          },
-        }
-      );
-    });
-
-    return () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-    };
-  }, [isLoaded]);
 
   // Compute progress numbers
   const allTasks = roadmapData.flatMap((p) => p.topics.flatMap((t) => t.tasks));
@@ -182,8 +149,12 @@ export default function RoadmapApp() {
             const phasePercent = total > 0 ? Math.round((completed / total) * 100) : 0;
 
             return (
-              <div
+              <motion.div
                 key={phase.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
                 className={`phase-card phase-accordion group bg-surface rounded-lg extruded overflow-hidden transition-all duration-300 ${
                   isPhaseOpen ? 'phase-accordion-active' : ''
                 }`}
@@ -333,7 +304,7 @@ export default function RoadmapApp() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
