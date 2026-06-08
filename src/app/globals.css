@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #006577;
+  --color-primary-container: #008096;
+  --color-on-primary: #ffffff;
+  --color-secondary: #af3100;
+  --color-secondary-container: #fd6534;
+  --color-on-secondary: #ffffff;
+  --color-tertiary: #894855;
+  --color-tertiary-container: #a6606e;
+  --color-on-tertiary: #ffffff;
+  --color-background: #f6f9ff;
+  --color-on-background: #171c21;
+  --color-surface: #f6f9ff;
+  --color-on-surface: #171c21;
+  --color-surface-container: #e9eef5;
+  --color-surface-container-low: #eff4fb;
+  --color-surface-container-high: #e4e9f0;
+  --color-surface-container-highest: #dee3ea;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-variant: #dee3ea;
+  --color-on-surface-variant: #3d494c;
+  --color-outline: #6d797d;
+  --color-outline-variant: #bdc8cc;
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-error: #ffffff;
+  --color-on-error-container: #93000a;
+  --color-primary-fixed: #abedff;
+  --color-primary-fixed-dim: #67d5ef;
+  --color-on-primary-fixed: #001f26;
+  --color-on-primary-fixed-variant: #004e5c;
+  --color-secondary-fixed: #ffdbd1;
+  --color-secondary-fixed-dim: #ffb59f;
+  --color-on-secondary-fixed: #3a0a00;
+  --color-on-secondary-fixed-variant: #862300;
+  --color-tertiary-fixed: #ffd9de;
+  --color-tertiary-fixed-dim: #ffb2bf;
+  --color-on-tertiary-fixed: #390917;
+  --color-on-tertiary-fixed-variant: #6f3441;
+  --color-inverse-surface: #2b3136;
+  --color-inverse-on-surface: #ecf1f8;
+  --color-inverse-primary: #67d5ef;
+  --color-surface-bright: #f6f9ff;
+  --color-surface-dim: #d5dae1;
+  --color-surface-tint: #00687a;
+
+  --spacing-unit: 8px;
+  --spacing-gutter: 16px;
+  --spacing-container-padding: 24px;
+  --spacing-element-gap: 12px;
+
+  --font-sans: var(--font-montserrat), ui-sans-serif, system-ui;
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-background);
+  color: var(--color-on-background);
+}
+
+/* Custom Neumorphic Shadows from Stitch */
+.extruded {
+  box-shadow: 8px 8px 16px #d1d9e6, -8px -8px 16px #ffffff;
+}
+
+.inset {
+  box-shadow: inset 4px 4px 8px #d1d9e6, inset -4px -4px 8px #ffffff;
+}
+
+/* Material Symbols configuration */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  display: inline-block;
+  line-height: 1;
+}
+
+/* Accordion Transition Rules */
+.phase-accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.phase-accordion-active .phase-accordion-content {
+  max-height: 4000px;
+}
+
+.topic-accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.topic-accordion-active .topic-accordion-content {
+  max-height: 1000px;
+}
+
+.rotate-icon {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.active-rotate {
+  transform: rotate(180deg);
+}
+
+/* Completed item aesthetics */
+.completed-task {
+  opacity: 0.6;
+}
+
+.completed-task span.task-title {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
