@@ -6,7 +6,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { roadmapData, Phase, Topic, Task } from '@/lib/roadmap-data';
 import { useChecklist } from '@/hooks/useChecklist';
-import LiveClock from './LiveClock';
+import LiveClock from '@/components/LiveClock';
 import dynamic from 'next/dynamic';
 
 const SpaceBackground = dynamic(() => import('./SpaceBackground'), {
