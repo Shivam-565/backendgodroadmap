@@ -6,10 +6,13 @@ import { roadmapData, Phase, Topic, Task } from '@/lib/roadmap-data';
 import { useChecklist } from '@/hooks/useChecklist';
 import LiveClock from '@/components/LiveClock';
 import dynamic from 'next/dynamic';
+import { Howl } from 'howler';
 
 const SpaceBackground = dynamic(() => import('./SpaceBackground'), {
   ssr: false,
 });
+
+let globalHowlInstance: Howl | null = null;
 
 export default function RoadmapApp() {
   const {
@@ -27,6 +30,44 @@ export default function RoadmapApp() {
 
   // Container refs for ScrollTrigger
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Music Player State
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  useEffect(() => {
+    // Sync state with global Howl instance if it already exists
+    if (globalHowlInstance) {
+      setIsPlaying(globalHowlInstance.playing());
+    }
+  }, []);
+
+  const togglePlay = () => {
+    if (typeof window === 'undefined') return;
+
+    if (!globalHowlInstance) {
+      globalHowlInstance = new Howl({
+        src: ['/theme.mp3'],
+        loop: true,
+        volume: 0.3,
+        html5: true, // stream file to avoid memory bloat/delay
+        onloaderror: (id, err) => {
+          console.error('Howler load error:', err);
+        },
+        onplayerror: (id, err) => {
+          console.error('Howler play error:', err);
+          setIsPlaying(false);
+        }
+      });
+    }
+
+    if (globalHowlInstance.playing()) {
+      globalHowlInstance.pause();
+      setIsPlaying(false);
+    } else {
+      globalHowlInstance.play();
+      setIsPlaying(true);
+    }
+  };
 
 
 
@@ -107,7 +148,7 @@ export default function RoadmapApp() {
               Backend God Roadmap
             </h1>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <LiveClock />
           </div>
         </div>
@@ -309,6 +350,22 @@ export default function RoadmapApp() {
           })}
         </div>
       </main>
+
+      {/* Floating Music Toggle Button */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={togglePlay}
+          className="w-12 h-12 bg-surface text-primary border border-outline-variant/30 rounded-full extruded flex items-center justify-center cursor-pointer select-none outline-none"
+          title={isPlaying ? "Mute Background Music" : "Play Background Music"}
+          aria-label={isPlaying ? "Mute Background Music" : "Play Background Music"}
+        >
+          <span className="material-symbols-outlined text-xl">
+            {isPlaying ? 'volume_up' : 'volume_off'}
+          </span>
+        </motion.button>
+      </div>
     </div>
   );
 }
