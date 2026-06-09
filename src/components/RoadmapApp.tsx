@@ -6,10 +6,13 @@ import { roadmapData, Phase, Topic, Task } from '@/lib/roadmap-data';
 import { useChecklist } from '@/hooks/useChecklist';
 import LiveClock from '@/components/LiveClock';
 import dynamic from 'next/dynamic';
+import { Howl } from 'howler';
 
 const SpaceBackground = dynamic(() => import('./SpaceBackground'), {
   ssr: false,
 });
+
+let globalHowlInstance: Howl | null = null;
 
 export default function RoadmapApp() {
   const {
@@ -28,34 +31,41 @@ export default function RoadmapApp() {
   // Container refs for ScrollTrigger
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Music Player State & Ref
+  // Music Player State
   const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    // Instantiate Audio on the client side only
-    audioRef.current = new Audio('https://archive.org/download/calm-relaxing-piano-collection/Relaxing%20Piano.mp3');
-    audioRef.current.loop = true;
-    audioRef.current.volume = 0.3; // Soft background volume
-
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-    };
+    // Sync state with global Howl instance if it already exists
+    if (globalHowlInstance) {
+      setIsPlaying(globalHowlInstance.playing());
+    }
   }, []);
 
   const togglePlay = () => {
-    if (!audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.pause();
+    if (typeof window === 'undefined') return;
+
+    if (!globalHowlInstance) {
+      globalHowlInstance = new Howl({
+        src: ['/theme.mp3'],
+        loop: true,
+        volume: 0.3,
+        html5: true, // stream file to avoid memory bloat/delay
+        onloaderror: (id, err) => {
+          console.error('Howler load error:', err);
+        },
+        onplayerror: (id, err) => {
+          console.error('Howler play error:', err);
+          setIsPlaying(false);
+        }
+      });
+    }
+
+    if (globalHowlInstance.playing()) {
+      globalHowlInstance.pause();
       setIsPlaying(false);
     } else {
-      audioRef.current.play().then(() => {
-        setIsPlaying(true);
-      }).catch((err) => {
-        console.error('Audio playback failed:', err);
-      });
+      globalHowlInstance.play();
+      setIsPlaying(true);
     }
   };
 
@@ -139,20 +149,6 @@ export default function RoadmapApp() {
             </h1>
           </div>
           <div className="flex items-center gap-3">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={togglePlay}
-              className="px-3 py-2 bg-surface rounded-lg text-primary font-semibold text-xs extruded flex items-center gap-2 cursor-pointer select-none outline-none border-none"
-              title="Toggle Calm Background Music"
-            >
-              <span className="material-symbols-outlined text-sm">
-                {isPlaying ? 'volume_up' : 'volume_off'}
-              </span>
-              <span className="hidden sm:inline">
-                {isPlaying ? 'Music On' : 'Music Off'}
-              </span>
-            </motion.button>
             <LiveClock />
           </div>
         </div>
@@ -354,6 +350,22 @@ export default function RoadmapApp() {
           })}
         </div>
       </main>
+
+      {/* Floating Music Toggle Button */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={togglePlay}
+          className="w-12 h-12 bg-surface text-primary border border-outline-variant/30 rounded-full extruded flex items-center justify-center cursor-pointer select-none outline-none"
+          title={isPlaying ? "Mute Background Music" : "Play Background Music"}
+          aria-label={isPlaying ? "Mute Background Music" : "Play Background Music"}
+        >
+          <span className="material-symbols-outlined text-xl">
+            {isPlaying ? 'volume_up' : 'volume_off'}
+          </span>
+        </motion.button>
+      </div>
     </div>
   );
 }
