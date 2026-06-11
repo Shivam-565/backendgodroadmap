@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { roadmapData, Phase, Topic, Task } from '@/lib/roadmap-data';
 import { useChecklist } from '@/hooks/useChecklist';
 import LiveClock from '@/components/LiveClock';
+import RoadmapIntro from '@/components/RoadmapIntro';
 import dynamic from 'next/dynamic';
 import { Howl } from 'howler';
 
@@ -138,6 +139,11 @@ export default function RoadmapApp() {
     const isTopicOpen = !openTopics[topic.id]; // Default open
     const topicDone = isTopicCompleted(topic);
 
+    // Extract marker if any (e.g., [T], [P], [TP])
+    const markerMatch = topic.title.match(/^(.*?)\s*\[(T|P|TP)\]$/i);
+    const displayTitle = markerMatch ? markerMatch[1] : topic.title;
+    const marker = markerMatch ? markerMatch[2].toUpperCase() : null;
+
     return (
       <div
         key={topic.id}
@@ -148,7 +154,7 @@ export default function RoadmapApp() {
           className="w-full flex items-center justify-between p-3 sm:p-4 bg-surface-container-low text-left outline-none"
           onClick={() => toggleTopic(topic.id)}
         >
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 w-full">
             {/* Topic Checklist Checkbox */}
             <motion.div
               whileTap={{ scale: 0.95 }}
@@ -163,8 +169,17 @@ export default function RoadmapApp() {
                 check
               </span>
             </motion.div>
-            <span className="font-bold text-xs sm:text-sm text-on-surface leading-tight pr-2 break-words min-w-0">
-              {topic.title}
+            <span className="font-bold text-xs sm:text-sm text-on-surface leading-tight pr-2 break-words min-w-0 flex flex-wrap items-center gap-2">
+              <span>{displayTitle}</span>
+              {marker && (
+                <span className={`inline-block px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase border tracking-wider select-none ${
+                  marker === 'T' ? 'bg-secondary/10 text-secondary border-secondary/25' :
+                  marker === 'P' ? 'bg-primary/10 text-primary border-primary/25' :
+                  'bg-tertiary/10 text-tertiary border-tertiary/25'
+                }`}>
+                  {marker === 'T' ? 'Theory' : marker === 'P' ? 'Practical' : 'Theory & Practice'}
+                </span>
+              )}
             </span>
           </div>
           <span className={`material-symbols-outlined text-xs rotate-icon text-outline p-1 flex-shrink-0 ${isTopicOpen ? 'active-rotate' : ''}`}>
@@ -291,6 +306,9 @@ export default function RoadmapApp() {
             <span>All status saved automatically in local storage</span>
           </div>
         </motion.div>
+
+        {/* Roadmap Intro Panel */}
+        <RoadmapIntro isTaskCompleted={isTaskCompleted} toggleTask={toggleTask} />
 
         {/* Phase List */}
         <div className="space-y-6 sm:space-y-8">
